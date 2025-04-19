@@ -1,0 +1,33 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+int decimal = 0;
+%}
+
+%%
+
+[01]+   {
+            decimal = 0;
+            for (int i = 0; yytext[i] != '\0'; i++) {
+                decimal = decimal * 2 + (yytext[i] - '0');
+            }
+            printf("Binary: %s -> Decimal: %d\n", yytext, decimal);
+        }
+
+.|\n    ; // Ignore everything else
+
+%%
+
+int main() {
+    printf("Enter binary numbers:\n");
+    yylex();
+    return 0;
+}
+
+ Output:
+bash
+Copy
+Edit
+Binary: 1010 -> Decimal: 10
+Binary: 1111 -> Decimal: 15
+Binary: 100000 -> Decimal: 32
