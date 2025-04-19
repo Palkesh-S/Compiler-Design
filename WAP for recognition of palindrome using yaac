@@ -1,0 +1,59 @@
+ Step 1: Lex File (palindrome.l):
+
+%{
+#include "y.tab.h"
+%}
+
+%%
+[a-zA-Z]    { yylval = yytext[0]; return CHAR; }
+\n          { return EOL; }
+.           ;   // Ignore everything else
+%%
+int yywrap() {
+    return 1;
+}
+
+ Step 2: Yacc File (palindrome.y)
+We'll define a grammar that recognizes palindromes recursively.
+
+%{
+#include <stdio.h>
+#include <stdlib.h>
+%}
+
+%token CHAR EOL
+
+%%
+input:
+      string EOL { printf("Palindrome ✅\n"); }
+    | error EOL  { printf("Not a palindrome ❌\n"); yyerrok; }
+    ;
+
+string:
+      /* empty string is a palindrome */
+    | CHAR
+    | CHAR string CHAR { 
+            if ($1 != $3) {
+                yyerror("Mismatched characters");
+                YYERROR;
+            }
+        }
+    ;
+
+%%
+
+int main() {
+    printf("Enter a string to check if it's a palindrome:\n");
+    yyparse();
+    return 0;
+}
+
+int yyerror(char *s) {
+    return 0;
+}
+
+Input:
+madam
+
+Output:
+Palindrome ✅
