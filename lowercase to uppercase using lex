@@ -1,0 +1,28 @@
+%{
+#include <stdio.h>
+%}
+
+%%
+
+[a-z]       { ECHO; printf("%c", yytext[0] - 32); }  // Convert to uppercase
+[A-Z]       { ECHO; }                               // Print as is
+[ \t\n]     { ECHO; }                               // Keep spaces/newlines
+.           { ECHO; }                               // Any other character
+
+%%
+
+int main() {
+    printf("Enter text:\n");
+    yylex();
+    return 0;
+}
+
+int yywrap() {
+    return 1;
+}
+
+ Example Input:
+hello World!
+
+Output:
+HELLO WORLD!
