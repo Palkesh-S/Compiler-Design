@@ -1,0 +1,79 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+#define MAX 100
+
+char stack[MAX];
+int top = -1;
+
+void push(char c) {
+    stack[++top] = c;
+}
+
+char pop() {
+    if (top == -1) return '\0';
+    return stack[top--];
+}
+
+char peek() {
+    if (top == -1) return '\0';
+    return stack[top];
+}
+
+int precedence(char op) {
+    if (op == '+' || op == '-') return 1;
+    if (op == '*' || op == '/') return 2;
+    return 0;
+}
+
+void handle_operator(char op) {
+    while (precedence(peek()) >= precedence(op)) {
+        printf("%c ", pop());
+    }
+    push(op);
+}
+
+%}
+
+%%
+
+[0-9]+      { printf("%s ", yytext); }
+
+[+\-*/]     { handle_operator(yytext[0]); }
+
+"("         { push('('); }
+
+")"         {
+                while (peek() != '(' && top != -1)
+                    printf("%c ", pop());
+                pop(); // remove '('
+            }
+
+\n          {
+                while (top != -1)
+                    printf("%c ", pop());
+                printf("\n");
+            }
+
+[ \t]       ;  // Ignore whitespace
+
+.           { printf("\nInvalid character: %s\n", yytext); }
+
+%%
+
+int main() {
+    printf("Enter infix expression:\n");
+    yylex();
+    return 0;
+}
+
+Input:
+Copy
+Edit
+3 + 4 * 2 / ( 1 - 5 )
+Output:
+Copy
+Edit
+3 4 2 * 1 5 - / +
