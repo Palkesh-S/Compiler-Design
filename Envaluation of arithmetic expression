@@ -1,0 +1,72 @@
+expr.l – Lex File
+
+%{
+#include "y.tab.h"
+#include <stdlib.h>
+%}
+
+%%
+
+[0-9]+      { yylval = atoi(yytext); return NUMBER; }
+[+\-*/()]   { return yytext[0]; }
+[ \t\n]     ;   // Ignore whitespace
+.           { printf("Invalid character: %s\n", yytext); }
+
+%%
+int yywrap() {
+    return 1;
+}
+
+expr.y – Yacc File
+
+
+%{
+#include <stdio.h>
+#include <stdlib.h>
+%}
+
+%token NUMBER
+%left '+' '-'
+%left '*' '/'
+
+%%
+input:
+      input expr '\n'  { printf("Result = %d\n", $2); }
+    | /* empty */
+    ;
+
+expr:
+      expr '+' expr    { $$ = $1 + $3; }
+    | expr '-' expr    { $$ = $1 - $3; }
+    | expr '*' expr    { $$ = $1 * $3; }
+    | expr '/' expr    { 
+                            if ($3 == 0) {
+                                printf("Error: Division by zero\n"); 
+                                exit(1);
+                            }
+                            $$ = $1 / $3; 
+                        }
+    | '(' expr ')'     { $$ = $2; }
+    | NUMBER           { $$ = $1; }
+    ;
+
+%%
+
+int main() {
+    printf("Enter arithmetic expressions:\n");
+    yyparse();
+    return 0;
+}
+
+int yyerror(char *s) {
+    printf("Error: %s\n", s);
+    return 0;
+}
+
+
+ Example Input:
+3 + 4 * (2 - 1)
+
+
+✅ Output:
+Result = 7
