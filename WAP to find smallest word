@@ -1,0 +1,41 @@
+%{
+#include <stdio.h>
+#include <string.h>
+
+char smallest[100];  // Store the smallest word
+int first = 1;       // Flag to check if this is the first word
+%}
+
+%%
+
+[a-zA-Z]+   {
+                if (first || strlen(yytext) < strlen(smallest)) {
+                    strcpy(smallest, yytext);
+                    first = 0;
+                }
+            }
+
+[ \t\n]+    ;   // Ignore spaces/newlines
+.           ;   // Ignore other characters
+
+%%
+
+int main() {
+    printf("Enter text:\n");
+    yylex();
+    if (!first)
+        printf("Smallest word: %s\n", smallest);
+    else
+        printf("No words found.\n");
+    return 0;
+}
+
+int yywrap() {
+    return 1;
+}
+
+Sample Input:
+Lex is powerful and fast
+
+Output:
+Smallest word: is
